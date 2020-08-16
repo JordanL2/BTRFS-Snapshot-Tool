@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cd "$(dirname "$0/")"
+
+pip3 install .
+
+cp ./snapshot@.service /etc/systemd/system/
+cp ./snapshot@.timer /etc/systemd/system/
+cp ./snapshot-backup@.service /etc/systemd/system/
+cp ./snapshot-backup@.timer /etc/systemd/system/
