@@ -8,8 +8,6 @@ import subprocess
 import sys
 
 
-
-
 def main():
     scriptpath = sys.argv.pop(0)
     if len(sys.argv) == 0:

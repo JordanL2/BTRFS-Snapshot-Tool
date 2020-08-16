@@ -7,10 +7,6 @@ import subprocess
 import sys
 
 
-# Remote structure:
-# /data/Backup/<HOST>/<SUBVOL>/<SNAPSHOT>
-
-
 def main():
     scriptpath = sys.argv.pop(0)
     if len(sys.argv) == 0:
