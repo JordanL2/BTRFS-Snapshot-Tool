@@ -22,5 +22,6 @@ setuptools.setup(
     entry_points = {'console_scripts': [
         'snapshot=btrfssnapshottools.snapshot:main',
         'snapshot-backup=btrfssnapshottools.snapshotbackup:main',
+        'snapshot-add=btrfssnapshottools.snapshotadd:main',
         ], },
 )
