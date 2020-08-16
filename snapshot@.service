@@ -3,4 +3,4 @@ Description=BTRFS Snapshot
 
 [Service]
 Type=oneshot
-ExecStart=snapshot %I
+ExecStart=/usr/bin/snapshot %I
