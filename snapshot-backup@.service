@@ -1,0 +1,6 @@
+[Unit]
+Description=BTRFS Snapshot Backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/snapshot-backup %I
