@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="btrfs-snapshot-tools",
+    name="btrfssnapshottools",
     version="1.0.0",
     author="Jordan Leppert",
     author_email="jordanleppert@gmail.com",
@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/JordanL2/BTRFS-Snapshot-Tool",
-    packages=setuptools.find_packages() + setuptools.find_namespace_packages(include=['btrfs-snapshot-tools.*']),
+    packages=setuptools.find_packages() + setuptools.find_namespace_packages(include=['btrfssnapshottools.*']),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: LGPL-2.1 License",
@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     entry_points = {'console_scripts': [
-        'snapshot = btrfs-snapshot-tools.snapshot:main',
-        'snapshot-backup = btrfs-snapshot-tools.snapshot-backup:main',
+        'snapshot=btrfssnapshottools.snapshot:main',
+        'snapshot-backup=btrfssnapshottools.snapshotbackup:main',
         ], },
 )
