@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
-from datetime import *
 import json
-import os
 import subprocess
 import sys
 
@@ -28,15 +26,14 @@ def main():
     fh.close
 
     cmd("systemctl enable --now snapshot@`systemd-escape {0}`.timer".format(path))
+
+    print("Set up snapshots for subvolume {0} with default configuration. Edit {1} to change configuration.".format(path, config_path))
     
 
 def cmd(command):
-    print("--- CMD:", command)
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = result.stdout.decode('utf-8').rstrip("\n")
     stderr = result.stderr.decode('utf-8').rstrip("\n")
-    print("  | OUT:", stdout)
-    print("  | ERR:", stderr)
     if result.returncode != 0:
         raise Exception("Command returned code {}".format(result.returncode))
     return stdout
