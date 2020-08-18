@@ -85,7 +85,7 @@ def main():
                 entry_filename = "/boot/loader/entries/snapshot-{0}-{1}.conf".format(timestamp, entry_name)
                 print("Making {0} entry - {1}".format(entry_name, entry_filename))
                 fh = open(entry_filename, 'w')
-                fh.write("title Snapshot {0} - {1}\n".format(dt_now.strftime('%a %d-%b %H:%M:%S'), entry['title']))
+                fh.write("title Snapshot - {0} - {1}\n".format(dt_now.strftime('%a %d-%b %H:%M:%S'), entry['title']))
                 fh.write("linux   {0}\n".format(entry['linux']))
                 fh.write("initrd  {0}\n".format(entry['initrd']))
                 fh.write("options root=UUID={0} {1} rootflags=subvol=/{2}/.snapshots/{3}\n".format(path_device_uuid, entry['options'], subvol, timestamp))
