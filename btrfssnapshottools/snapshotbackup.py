@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 
 def main():
@@ -24,6 +25,19 @@ def main():
     remote_backups = config['remote-backup']['remote-dir']
     ssh_options = config['remote-backup']['ssh-options']
     remote_snapshots_path = "{0}/{1}/{2}".format(remote_backups, hostname, subvol)
+
+    # Ensure remote is accessible
+    max_failures = 60
+    failed = 0
+    while failed < max_failures:
+        try:
+            cmd("ssh {0} \"echo 'hello'\"".format(ssh_options))
+            break
+        except Exception:
+            failed += 1
+            time.sleep(10)
+    if failed == max_failures:
+        raise Exception("Remote is not accessible")
 
     # Ensure remote snapshots dir exists
     cmd("ssh {0} \"sudo mkdir -p {1}\"".format(ssh_options, remote_snapshots_path))
