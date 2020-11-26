@@ -81,13 +81,20 @@ def main():
                         print("Previous entry too recent, not making {} entry".format(entry_name))
                         continue
 
+                # Backup kernel / initrd
+                linux_snapshot = "/snapshots/{0}-{1}".format(entry['linux'], timestamp)
+                initrd_snapshot = "/snapshots/{0}-{1}".format(entry['initrd'], timestamp)
+                cmd('mkdir -p /boot/snapshots')
+                cmd("cp /boot/{0} /boot/{1}".format(entry['linux'], linux_snapshot))
+                cmd("cp /boot/{0} /boot/{1}".format(entry['initrd'], initrd_snapshot))
+
                 # Make entry
                 entry_filename = "/boot/loader/entries/snapshot-{0}-{1}.conf".format(timestamp, entry_name)
                 print("Making {0} entry - {1}".format(entry_name, entry_filename))
                 fh = open(entry_filename, 'w')
                 fh.write("title Snapshot - {0} - {1}\n".format(dt_now.strftime('%a %d-%b %H:%M:%S'), entry['title']))
-                fh.write("linux   {0}\n".format(entry['linux']))
-                fh.write("initrd  {0}\n".format(entry['initrd']))
+                fh.write("linux   {0}\n".format(linux_snapshot))
+                fh.write("initrd  {0}\n".format(initrd_snapshot))
                 fh.write("options root=UUID={0} {1} rootflags=subvol=/{2}/.snapshots/{3}\n".format(path_device_uuid, entry['options'], subvol, timestamp))
                 fh.close
     
@@ -108,6 +115,12 @@ def main():
                             entry_filename = "/boot/loader/entries/snapshot-{0}-{1}.conf".format(old_snapshot, entry_name)
                             print("Deleting snapshot {0} bootloader entry {1}".format(old_snapshot, entry_filename))
                             cmd("rm {0} || true".format(entry_filename))
+
+                            # Delete kernel / initrd
+                            linux_snapshot = "/snapshots/{0}-{1}".format(entry['linux'], old_snapshot)
+                            initrd_snapshot = "/snapshots/{0}-{1}".format(entry['initrd'], old_snapshot)
+                            cmd("rm /boot/{0}".format(entry['linux'], linux_snapshot))
+                            cmd("rm /boot/{0}".format(entry['initrd'], initrd_snapshot))
         except ValueError:
             pass
     
