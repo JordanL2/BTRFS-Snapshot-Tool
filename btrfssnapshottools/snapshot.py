@@ -119,8 +119,8 @@ def main():
                             # Delete kernel / initrd
                             linux_snapshot = "/snapshots/{0}-{1}".format(entry['linux'], old_snapshot)
                             initrd_snapshot = "/snapshots/{0}-{1}".format(entry['initrd'], old_snapshot)
-                            cmd("rm /boot/{0}".format(entry['linux'], linux_snapshot))
-                            cmd("rm /boot/{0}".format(entry['initrd'], initrd_snapshot))
+                            cmd("rm /boot/{0} || true".format(entry['linux'], linux_snapshot))
+                            cmd("rm /boot/{0} || true".format(entry['initrd'], initrd_snapshot))
         except ValueError:
             pass
     
