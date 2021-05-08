@@ -81,12 +81,20 @@ def main():
                         print("Previous entry too recent, not making {} entry".format(entry_name))
                         continue
 
-                # Backup kernel / initrd
-                linux_snapshot = "/snapshots/{0}-{1}".format(entry['linux'], timestamp)
-                initrd_snapshot = "/snapshots/{0}-{1}".format(entry['initrd'], timestamp)
+                # Backup kernel / initrd(s)
                 cmd('mkdir -p /boot/snapshots')
+                linux_snapshot = "/snapshots/{0}-{1}".format(entry['linux'], timestamp)
                 cmd("cp /boot/{0} /boot/{1}".format(entry['linux'], linux_snapshot))
-                cmd("cp /boot/{0} /boot/{1}".format(entry['initrd'], initrd_snapshot))
+                initrds = entry['initrd']
+                if not isinstance(initrds, list):
+                    initrds = [ initrds ]
+                initrd_snapshots = []
+                for initrd in initrds:
+                    initrd_snapshots.append("/snapshots/{0}-{1}".format(initrd, timestamp))
+                for i in range(0, len(initrd_snapshots)):
+                    initrd = initrds[i]
+                    initrd_snapshot = initrd_snapshots[i]
+                    cmd("cp /boot/{0} /boot/{1}".format(initrd, initrd_snapshot))
 
                 # Make entry
                 entry_filename = "/boot/loader/entries/snapshot-{0}-{1}.conf".format(timestamp, entry_name)
@@ -94,7 +102,8 @@ def main():
                 fh = open(entry_filename, 'w')
                 fh.write("title Snapshot - {0} - {1}\n".format(dt_now.strftime('%a %d-%b %H:%M:%S'), entry['title']))
                 fh.write("linux   {0}\n".format(linux_snapshot))
-                fh.write("initrd  {0}\n".format(initrd_snapshot))
+                for initrd_snapshot in initrd_snapshots:
+                    fh.write("initrd  {0}\n".format(initrd_snapshot))
                 fh.write("options root=UUID={0} {1} rootflags=subvol=/{2}/.snapshots/{3}\n".format(path_device_uuid, entry['options'], subvol, timestamp))
                 fh.close
     
@@ -118,9 +127,15 @@ def main():
 
                             # Delete kernel / initrd
                             linux_snapshot = "/snapshots/{0}-{1}".format(entry['linux'], old_snapshot)
-                            initrd_snapshot = "/snapshots/{0}-{1}".format(entry['initrd'], old_snapshot)
                             cmd("rm /boot/{0} || true".format(linux_snapshot))
-                            cmd("rm /boot/{0} || true".format(initrd_snapshot))
+                            initrds = entry['initrd']
+                            if not isinstance(initrds, list):
+                                initrds = [ initrds ]
+                            initrd_snapshots = []
+                            for initrd in initrds:
+                                initrd_snapshots.append("/snapshots/{0}-{1}".format(initrd, old_snapshot))
+                            for initrd_snapshot in initrd_snapshots:
+                                cmd("rm /boot/{0} || true".format(initrd_snapshot))
         except ValueError:
             pass
     
