@@ -15,7 +15,7 @@ def main():
     else:
         path = sys.argv.pop(0)
     
-    hostname = cmd("hostname")
+    hostname = cmd("echo $HOSTNAME")
     subvol = cmd("sudo btrfs sub show {0} | head -n1".format(path))
     local_snapshots_path = path + '/.snapshots'
 
