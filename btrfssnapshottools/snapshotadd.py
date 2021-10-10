@@ -11,11 +11,12 @@ def main():
         cli.help()
     else:
         path = sys.argv.pop(0)
+    print("Adding snapshot for {}".format(path))
 
     snapshots_path = path + '/.snapshots'
     config_path = snapshots_path + "/CONFIG.json"
 
-    cmd("btrfs subvolume create {0}".format(snapshots_path))
+    cmd("sudo btrfs subvolume create {0}".format(snapshots_path))
 
     default_config = {
         'keep_days': 1,
