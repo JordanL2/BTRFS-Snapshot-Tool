@@ -40,14 +40,14 @@ def main():
     dt_now = datetime.now()
     timestamp = dt_now.strftime(config['dateformat'])
     deleted_snapshot = False
-    cmd("btrfs subvolume snapshot -r {0} {1}/{2}".format(path, snapshots_path, timestamp))
+    cmd("sudo btrfs subvolume snapshot -r {0} {1}/{2}".format(path, snapshots_path, timestamp))
 
     # # Delete snapshot if there's no difference to previous
     if newest_snapshot is not None:
-        res = cmd("btrfs send --no-data -p {0}/{1} {0}/{2} | btrfs receive --dump | tail -n+2".format(snapshots_path, newest_snapshot, timestamp))
+        res = cmd("sudo btrfs send --no-data -p {0}/{1} {0}/{2} | btrfs receive --dump | tail -n+2".format(snapshots_path, newest_snapshot, timestamp))
         if res == "":
             print("No difference between snapshot and previous, deleting.")
-            cmd("btrfs subvolume delete --commit-each {0}/{1}".format(snapshots_path, timestamp))
+            cmd("sudo btrfs subvolume delete --commit-each {0}/{1}".format(snapshots_path, timestamp))
             deleted_snapshot = True
 
     # Create bootloader entries
@@ -115,7 +115,7 @@ def main():
             seconds_difference = dt_difference.total_seconds()
             if seconds_difference > config['keep_seconds']:
                 print("Deleting snapshot {0} as it is too old".format(old_snapshot))
-                cmd("btrfs subvolume delete --commit-each {0}/{1}".format(snapshots_path, old_snapshot))
+                cmd("sudo btrfs subvolume delete --commit-each {0}/{1}".format(snapshots_path, old_snapshot))
 
                 # Delete bootloader entry
                 if 'bootloader' in config:
