@@ -77,13 +77,13 @@ def main():
     # Sync to remote
     if last_remote_snapshot is None:
         # If no remote snapshot, or snapshot name doesn't exist, sync entire last snapshot
-        cmd("btrfs send {0}/{1} | ssh {2} \"sudo btrfs receive {3}\"".format(local_snapshots_path, last_local_snapshot, ssh_options, remote_snapshots_path))
+        cmd("sudo btrfs send {0}/{1} | ssh {2} \"sudo btrfs receive {3}\"".format(local_snapshots_path, last_local_snapshot, ssh_options, remote_snapshots_path))
     elif last_remote_snapshot == last_local_snapshot:
         # No new snapshot to sync
         print("Most recent local snapshot has already been synced.")
     else:
         # Otherwise sync differences between snapshots
-        cmd("btrfs send -p {0}/{1} {0}/{2} | ssh {3} \"sudo btrfs receive {4}\"".format(local_snapshots_path, last_remote_snapshot, last_local_snapshot, ssh_options, remote_snapshots_path))
+        cmd("sudo btrfs send -p {0}/{1} {0}/{2} | ssh {3} \"sudo btrfs receive {4}\"".format(local_snapshots_path, last_remote_snapshot, last_local_snapshot, ssh_options, remote_snapshots_path))
 
     # Delete all old remote snapshots
     for r in remote_snapshots:
