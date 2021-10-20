@@ -106,7 +106,7 @@ def main():
         if backup_type == 'btrfs':
             cmd("sudo btrfs send -p {0}/{1} {0}/{2} | ssh {3} \"sudo btrfs receive {4}\"".format(local_snapshots_path, last_remote_snapshot, last_local_snapshot, ssh_command, remote_snapshots_path))
         elif backup_type == 'rsync':
-            cmd("rsync -a --delete --rsync-path=\"sudo rsync\" -e \"ssh {0} -l {1}\" {3}/{4} {2}:{5}/".format(ssh_options, remote_user, remote_host, local_snapshots_path, last_local_snapshot, remote_snapshots_path))
+            cmd("rsync -a --delete --link-dest={5}/{6}/ --rsync-path=\"sudo rsync\" -e \"ssh {0} -l {1}\" {3}/{4}/ {2}:{5}/{4}/".format(ssh_options, remote_user, remote_host, local_snapshots_path, last_local_snapshot, remote_snapshots_path, last_remote_snapshot))
 
     # Delete all old remote snapshots
     for r in remote_snapshots:
