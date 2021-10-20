@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="btrfssnapshottools",
-    version="1.0.1",
+    version="1.1.0",
     author="Jordan Leppert",
     author_email="jordanleppert@gmail.com",
     description="A tool to take regular snapshots of BTRFS subvolumes, and optionally back them up to a remote location.",
