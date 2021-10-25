@@ -40,6 +40,9 @@ def main():
         backup_type = config['remote-backup']['backup-type']
         if backup_type not in backup_types:
             raise Exception("Invalid backup type {} - valid types are: {}".format(backup_type, ', '.join(backup_types)))
+    max_snapshots = 5
+    if 'max-snapshots' in config['remote-backup']:
+         max_snapshots = config['remote-backup']['max-snapshots']
     remote_snapshots_path = "{0}/{1}/{2}".format(remote_backups, hostname, subvol)
 
     # Ensure remote is accessible
@@ -92,29 +95,37 @@ def main():
         print("No remote snapshots found")
 
     # Sync to remote
-    if last_remote_snapshot is None:
-        # If no remote snapshot, or snapshot name doesn't exist, sync entire last snapshot
+    try:
+        if last_remote_snapshot is None:
+            # If no remote snapshot, or snapshot name doesn't exist, sync entire last snapshot
+            if backup_type == 'btrfs':
+                cmd("sudo btrfs send {0}/{1} | ssh {2} \"sudo btrfs receive {3}\"".format(local_snapshots_path, last_local_snapshot, ssh_command, remote_snapshots_path))
+            elif backup_type == 'rsync':
+                cmd("rsync -a --delete --rsync-path=\"sudo rsync\" -e \"ssh {0} -l {1}\" {3}/{4} {2}:{5}/".format(ssh_options, remote_user, remote_host, local_snapshots_path, last_local_snapshot, remote_snapshots_path))
+        elif last_remote_snapshot == last_local_snapshot:
+            # No new snapshot to sync
+            print("Most recent local snapshot has already been synced.")
+        else:
+            # Otherwise sync differences between snapshots
+            if backup_type == 'btrfs':
+                cmd("sudo btrfs send -p {0}/{1} {0}/{2} | ssh {3} \"sudo btrfs receive {4}\"".format(local_snapshots_path, last_remote_snapshot, last_local_snapshot, ssh_command, remote_snapshots_path))
+            elif backup_type == 'rsync':
+                cmd("rsync -a --delete --link-dest={5}/{6}/ --rsync-path=\"sudo rsync\" -e \"ssh {0} -l {1}\" {3}/{4}/ {2}:{5}/{4}/".format(ssh_options, remote_user, remote_host, local_snapshots_path, last_local_snapshot, remote_snapshots_path, last_remote_snapshot))
+    except Exception:
+        # If sync failed, delete partial backup before quitting
         if backup_type == 'btrfs':
-            cmd("sudo btrfs send {0}/{1} | ssh {2} \"sudo btrfs receive {3}\"".format(local_snapshots_path, last_local_snapshot, ssh_command, remote_snapshots_path))
+            cmd("ssh {0} \"sudo btrfs subvolume delete {1}/{2}\"".format(ssh_command, remote_snapshots_path, last_local_snapshot))
         elif backup_type == 'rsync':
-            cmd("rsync -a --delete --rsync-path=\"sudo rsync\" -e \"ssh {0} -l {1}\" {3}/{4} {2}:{5}/".format(ssh_options, remote_user, remote_host, local_snapshots_path, last_local_snapshot, remote_snapshots_path))
-    elif last_remote_snapshot == last_local_snapshot:
-        # No new snapshot to sync
-        print("Most recent local snapshot has already been synced.")
-    else:
-        # Otherwise sync differences between snapshots
-        if backup_type == 'btrfs':
-            cmd("sudo btrfs send -p {0}/{1} {0}/{2} | ssh {3} \"sudo btrfs receive {4}\"".format(local_snapshots_path, last_remote_snapshot, last_local_snapshot, ssh_command, remote_snapshots_path))
-        elif backup_type == 'rsync':
-            cmd("rsync -a --delete --link-dest={5}/{6}/ --rsync-path=\"sudo rsync\" -e \"ssh {0} -l {1}\" {3}/{4}/ {2}:{5}/{4}/".format(ssh_options, remote_user, remote_host, local_snapshots_path, last_local_snapshot, remote_snapshots_path, last_remote_snapshot))
+            cmd("ssh {0} \"sudo rm -rf {1}/{2}\"".format(ssh_command, remote_snapshots_path, last_local_snapshot))
 
     # Delete all old remote snapshots
-    for r in remote_snapshots:
-        if r[0] != last_local_snapshot:
-            if backup_type == 'btrfs':
-                cmd("ssh {0} \"sudo btrfs subvolume delete {1}/{2}\"".format(ssh_command, remote_snapshots_path, r[0]))
-            elif backup_type == 'rsync':
-                cmd("ssh {0} \"sudo rm -rf {1}/{2}\"".format(ssh_command, remote_snapshots_path, r[0]))
+    if len(remote_snapshots) > max_snapshots:
+        for r in remote_snapshots[max_snapshots:]:
+            if r[0] != last_local_snapshot:
+                if backup_type == 'btrfs':
+                    cmd("ssh {0} \"sudo btrfs subvolume delete {1}/{2}\"".format(ssh_command, remote_snapshots_path, r[0]))
+                elif backup_type == 'rsync':
+                    cmd("ssh {0} \"sudo rm -rf {1}/{2}\"".format(ssh_command, remote_snapshots_path, r[0]))
 
 def cmd(command):
     print("--- CMD:", command)
