@@ -42,14 +42,6 @@ def main():
     deleted_snapshot = False
     cmd("sudo btrfs subvolume snapshot -r {0} {1}/{2}".format(path, snapshots_path, timestamp))
 
-    # # Delete snapshot if there's no difference to previous
-    if newest_snapshot is not None:
-        res = cmd("sudo btrfs send --no-data -p {0}/{1} {0}/{2} | btrfs receive --dump | tail -n+2".format(snapshots_path, newest_snapshot, timestamp))
-        if res == "":
-            print("No difference between snapshot and previous, deleting.")
-            cmd("sudo btrfs subvolume delete --commit-each {0}/{1}".format(snapshots_path, timestamp))
-            deleted_snapshot = True
-
     # Create bootloader entries
     if 'bootloader' in config and not deleted_snapshot:
         path_device = cmd("df --output=source {0} | tail -n+2".format(path))
