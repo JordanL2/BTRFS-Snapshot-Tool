@@ -128,6 +128,9 @@ def main():
                 elif backup_type == 'rsync':
                     cmd("ssh {0} \"sudo rm -rf {1}/{2}\"".format(ssh_command, remote_snapshots_path, r[0]))
 
+    # Declare successful sync
+    cmd("touch {}/.lastsync".format(local_snapshots_path))
+
 def cmd(command):
     print("--- CMD:", command)
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
